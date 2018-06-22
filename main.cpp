@@ -39,21 +39,21 @@ int main (void) {
     long long input_number_long; // Целое число - 8 байт
     bool flag_floating_point; // Флаг, индицирующий, что число является числом с плавающей запятой
 
-
+    // Используем механизм объединений для упрощения работы с числами с плавающей запятой
+    // Объединение для представления float как unsigned int - 4 байта данных
     union {
-        float num; //4 байта
-        unsigned int byte4; //4 байта
-    }
-    uni2;
+        float real;
+        unsigned int integer;
+    } float_as_int;
     
+    // Объединение для представления double как unsigned long long - 8 байт данных
     union {
-        double num; //8 байт
-        unsigned long long byte8; //8 байт
-    }
-    uni3;
+        double real;
+        unsigned long long integer;
+    } double_as_long;
 
-    while (true)
-    {
+
+    while (true) {
         //Выясняем формат данных
         data_type = '?';
         while (
@@ -115,49 +115,49 @@ int main (void) {
             //Выводим двоичное (и десятичное для контроля правильности ввода) значения
             cout << "Десятичное " << input_number_float << endl;
             Bits(&input_number_float, sizeof(input_number_float));			
-            uni2.num = input_number_float;
-            Invert(uni2.byte4);
-            Bits(&uni2.byte4, sizeof(uni2.byte4));
+            float_as_int.real = input_number_float;
+            Invert(float_as_int.integer);
+            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'd':
             input_number_double = (double)ConvertFloat(input_buffer, number_base);
             cout << "Десятичное " << input_number_double << endl;
             Bits(&input_number_double, sizeof(input_number_double));
-            uni3.num = input_number_double;
-            Invert8(uni3.byte8);
-            Bits(&uni3.byte8, sizeof(uni3.byte8));
+            double_as_long.real = input_number_double;
+            Invert8(double_as_long.integer);
+            Bits(&double_as_long.integer, sizeof(double_as_long.integer));
             break;
         case 'i':
             input_number_int = (int)ConvertInt(input_buffer, number_base);
             cout << "Десятичное " << input_number_int << endl;
             Bits(&input_number_int, sizeof(input_number_int));
-            uni2.num = input_number_int;
-            Invert(uni2.byte4);
-            Bits(&uni2.byte4, sizeof(uni2.byte4));
+            float_as_int.real = input_number_int;
+            Invert(float_as_int.integer);
+            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'l':
             input_number_long = (long int)ConvertInt(input_buffer, number_base);
             cout << "Десятичное " << input_number_long << endl;
             Bits(&input_number_long, sizeof(input_number_long));
-            uni2.num = input_number_long;
-            Invert(uni2.byte4);
-            Bits(&uni2.byte4, sizeof(uni2.byte4));
+            float_as_int.real = input_number_long;
+            Invert(float_as_int.integer);
+            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'c':
             input_number_char = (char)ConvertInt(input_buffer, number_base);
             cout << "Десятичное " << (int)input_number_char << endl;
             Bits(&input_number_char, sizeof(input_number_char));
-            uni2.num = input_number_char;
-            Invert(uni2.byte4);
-            Bits(&uni2.byte4, sizeof(uni2.byte4));
+            float_as_int.real = input_number_char;
+            Invert(float_as_int.integer);
+            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 's':
             input_number_short = (short int)ConvertInt(input_buffer, number_base);
             cout << "Десятичное " << input_number_short << endl;
             Bits(&input_number_short, sizeof(input_number_short));
-            uni2.num = input_number_short;
-            Invert(uni2.byte4);
-            Bits(&uni2.byte4, sizeof(uni2.byte4));
+            float_as_int.real = input_number_short;
+            Invert(float_as_int.integer);
+            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         }
         pause;
