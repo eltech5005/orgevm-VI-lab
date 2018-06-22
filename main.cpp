@@ -1,11 +1,12 @@
 
-#include "includes.h"
-#include "interface.h"
+#include "includes.h"  // Подключение системных библиотек
+#include "interface.h" // Подключение интерфейсных определений
 
 using namespace std;
 
+// Прототипы функций
 int Pos(char c);
-bool verify(char * s, int base, bool havepoint);
+bool verify(char * s, int base, bool flag_floating_point);
 long long ConvertInt(char * buffer, int base);
 double power(long num, long deg);
 long double ConvertFloat(char * buffer, int base);
@@ -14,6 +15,7 @@ void Bits(void * data, int size);
 void Invert(unsigned int arg);
 void Invert8(unsigned long long arg);
 
+// Непосредственно программа
 int main (void) {
 
     // Настройка консоли для Windows
@@ -24,19 +26,19 @@ int main (void) {
 
     clrscr;
 
-    //Объявляем переменные
-    char format;//Переменная для выяснения типа данных
-    int base;//Система сччисления
-    char buffer[80];//Объявление строки
-    //Список возможных типов данных
-    float Float;//Тип с плавающей запятой наименьшего размера.
-    double Double;//Тип с плавающей запятой, размер которого больше или равен размеру типа float
-    int Int;//Целочисленный тип
-    long long Long;//Целочисленный тип размер которого больше или равен размеру типа int.
-    short Short;//Целочисленный тип, размер которого меньше или равен размеру типа int
-    char Char; //Целочисленный тип, обычно содержащий члены основной кодировки выполнения
+    // Объявление переменных
+    char data_type;        // Тип данных вводимого значени
+    int number_base;       // Основание системы счисления вводимого значения
+    char input_buffer[80]; // Строковый буфер для ввода значения
+    // Переменные различного типа для ввода значения 
+    float input_number_float;    // Число с плавающей запятой - 4 байта
+    double input_number_double;  // Число с плавающей запятой - 8 байт
+    char input_number_char;      // Целое число - 1 байт
+    short input_number_short;    // Целое число - 2 байта
+    int input_number_int;        // Целое число - 4 байта
+    long long input_number_long; // Целое число - 8 байт
+    bool flag_floating_point; // Флаг, индицирующий, что число является числом с плавающей запятой
 
-    bool havepoint; //Переменная для проверки точки
 
     union {
         float num; //4 байта
@@ -53,43 +55,43 @@ int main (void) {
     while (true)
     {
         //Выясняем формат данных
-        format = '?';
+        data_type = '?';
         while (
-            format != 'f' &&
-            format != 'd' &&
-            format != 's' &&
-            format != 'i' &&
-            format != 'l' &&
-            format != 'c'
+            data_type != 'f' &&
+            data_type != 'd' &&
+            data_type != 's' &&
+            data_type != 'i' &&
+            data_type != 'l' &&
+            data_type != 'c'
             )
         {
             cout << "Формат данных: float, double, short, int, long long, char или quit" << endl;
-            cin.getline(buffer, sizeof(buffer));
-            format = buffer[0];
-            if (format == 'q') return 0; //Завершаем работу программы если quit
-            if (format == 0) return 0; //или просто enter
+            cin.getline(input_buffer, sizeof(input_buffer));
+            data_type = input_buffer[0];
+            if (data_type == 'q') return 0; //Завершаем работу программы если quit
+            if (data_type == 0) return 0; //или просто enter
         }
         //Если float или double, значит подразумевается запятая
-        havepoint = format == 'f' || format == 'd';
+        flag_floating_point = data_type == 'f' || data_type == 'd';
         //Выясняем систему счисления
-        base = 0;
-        while (base<2 || base >= (26+10))
+        number_base = 0;
+        while (number_base<2 || number_base >= (26+10))
         {
             cout << "Выберите систему счисления 2-36: ";
-            cin.getline(buffer, sizeof(buffer));
-            base = atoi(buffer);
+            cin.getline(input_buffer, sizeof(input_buffer));
+            number_base = atoi(input_buffer);
         }
         //Читаем строку
         do { //Настойчиво требуем ввода 
             cout << "Введите значение: ";
-            cin.getline(buffer, sizeof(buffer));
-        } while (!verify(buffer, base, havepoint)); //Пока не введет верное значение
+            cin.getline(input_buffer, sizeof(input_buffer));
+        } while (!verify(input_buffer, number_base, flag_floating_point)); //Пока не введет верное значение
 
-        long double value = ConvertFloat(buffer, base);
+        long double value = ConvertFloat(input_buffer, number_base);
         if (value < 0) value = -value;
         bool overflow = false;
         //Проверка на переполнение
-        switch (format)
+        switch (data_type)
         {
         case 'f':overflow = value > FLT_MAX; break;
         case 'd':overflow = value > DBL_MAX; break;
@@ -106,54 +108,54 @@ int main (void) {
         }
 
         //Преобразование из строки в нужный тип данных
-        switch (format)
+        switch (data_type)
         {
         case 'f':
-            Float = (float)ConvertFloat(buffer, base);			
+            input_number_float = (float)ConvertFloat(input_buffer, number_base);			
             //Выводим двоичное (и десятичное для контроля правильности ввода) значения
-            cout << "Десятичное " << Float << endl;
-            Bits(&Float, sizeof(Float));			
-            uni2.num = Float;
+            cout << "Десятичное " << input_number_float << endl;
+            Bits(&input_number_float, sizeof(input_number_float));			
+            uni2.num = input_number_float;
             Invert(uni2.byte4);
             Bits(&uni2.byte4, sizeof(uni2.byte4));
             break;
         case 'd':
-            Double = (double)ConvertFloat(buffer, base);
-            cout << "Десятичное " << Double << endl;
-            Bits(&Double, sizeof(Double));
-            uni3.num = Double;
+            input_number_double = (double)ConvertFloat(input_buffer, number_base);
+            cout << "Десятичное " << input_number_double << endl;
+            Bits(&input_number_double, sizeof(input_number_double));
+            uni3.num = input_number_double;
             Invert8(uni3.byte8);
             Bits(&uni3.byte8, sizeof(uni3.byte8));
             break;
         case 'i':
-            Int = (int)ConvertInt(buffer, base);
-            cout << "Десятичное " << Int << endl;
-            Bits(&Int, sizeof(Int));
-            uni2.num = Int;
+            input_number_int = (int)ConvertInt(input_buffer, number_base);
+            cout << "Десятичное " << input_number_int << endl;
+            Bits(&input_number_int, sizeof(input_number_int));
+            uni2.num = input_number_int;
             Invert(uni2.byte4);
             Bits(&uni2.byte4, sizeof(uni2.byte4));
             break;
         case 'l':
-            Long = (long int)ConvertInt(buffer, base);
-            cout << "Десятичное " << Long << endl;
-            Bits(&Long, sizeof(Long));
-            uni2.num = Long;
+            input_number_long = (long int)ConvertInt(input_buffer, number_base);
+            cout << "Десятичное " << input_number_long << endl;
+            Bits(&input_number_long, sizeof(input_number_long));
+            uni2.num = input_number_long;
             Invert(uni2.byte4);
             Bits(&uni2.byte4, sizeof(uni2.byte4));
             break;
         case 'c':
-            Char = (char)ConvertInt(buffer, base);
-            cout << "Десятичное " << (int)Char << endl;
-            Bits(&Char, sizeof(Char));
-            uni2.num = Char;
+            input_number_char = (char)ConvertInt(input_buffer, number_base);
+            cout << "Десятичное " << (int)input_number_char << endl;
+            Bits(&input_number_char, sizeof(input_number_char));
+            uni2.num = input_number_char;
             Invert(uni2.byte4);
             Bits(&uni2.byte4, sizeof(uni2.byte4));
             break;
         case 's':
-            Short = (short int)ConvertInt(buffer, base);
-            cout << "Десятичное " << Short << endl;
-            Bits(&Short, sizeof(Short));
-            uni2.num = Short;
+            input_number_short = (short int)ConvertInt(input_buffer, number_base);
+            cout << "Десятичное " << input_number_short << endl;
+            Bits(&input_number_short, sizeof(input_number_short));
+            uni2.num = input_number_short;
             Invert(uni2.byte4);
             Bits(&uni2.byte4, sizeof(uni2.byte4));
             break;
@@ -171,7 +173,7 @@ int Pos(char c) {
 }
 
 //Проверка на допустимость символов, заодно перевести на верхний регистр
-bool verify(char * s, int base, bool havepoint) {
+bool verify(char * s, int base, bool flag_floating_point) {
     int points = 0; //Счетчик точек (отделяющих дробную часть)
     for (int k = 0; s[k] != 0; k++)
     {
@@ -184,7 +186,7 @@ bool verify(char * s, int base, bool havepoint) {
         return false; //Если незаконный символ
     }
     if (points > 1) return false; //Если слишком много точек
-    if (points > 0 && !havepoint) return false; //Если точка есть, но ее не должно быть
+    if (points > 0 && !flag_floating_point) return false; //Если точка есть, но ее не должно быть
     return true; //Все символы допустимые
 }
 
