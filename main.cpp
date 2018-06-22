@@ -367,7 +367,7 @@ long double convert_float (char * input_buffer, int number_base) {
     return result;
 }
 
-//Функция вывода (побитно один байт)
+// Функция вывода байта в двоичном виде
 void print_binary (char data) {
     unsigned char mask = 0x80; // Исходная маска
 
@@ -383,7 +383,7 @@ void print_binary (char data) {
     cout << " "; // Вставляем пробел между байтами
 }
 
-//Вывести побитно данные размером size байт
+// Функция вывода числа в двоичном виде
 void print_binary (void * data, int size) {
     char* data_string = (char*)data; // Разбиваем число на байты
 
@@ -394,6 +394,7 @@ void print_binary (void * data, int size) {
     cout << endl;
 }
 
+// Функция перестановки группы бит для числа размером 1 байт
 void swap_bit_group_1byte (char arg) {
 
     int group_size; // Размер группы для замены
@@ -454,6 +455,7 @@ void swap_bit_group_1byte (char arg) {
 
 }
 
+// Функция перестановки группы бит для числа размером 2 байта
 void swap_bit_group_2bytes (unsigned short arg) {
 
     int group_size; // Размер группы для замены
@@ -514,6 +516,7 @@ void swap_bit_group_2bytes (unsigned short arg) {
 
 }
 
+// Функция перестановки группы бит для числа размером 4 байта
 void swap_bit_group_4bytes (unsigned int arg) {
 
     int group_size; // Размер группы для замены
@@ -574,6 +577,7 @@ void swap_bit_group_4bytes (unsigned int arg) {
 
 }
 
+// Функция перестановки группы бит для числа размером 8 байт
 void swap_bit_group_8bytes (unsigned long long arg) {
 
     int group_size; // Размер группы для замены
