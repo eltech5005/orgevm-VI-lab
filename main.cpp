@@ -14,8 +14,8 @@ double power(long number, long degree);
 bool overflow_number_check (char* input_buffer, int number_base, char data_type);
 long long convert_integer (char * buffer, int base);
 long double convert_float (char * buffer, int base);
-void Bits(char data);
-void Bits(void * data, int size);
+void print_binary(char data);
+void print_binary(void * data, int size);
 void Invert(unsigned int arg);
 void Invert8(unsigned long long arg);
 
@@ -89,50 +89,50 @@ int main (void) {
             input_number_float = (float)convert_float(input_buffer, number_base);			
             //Выводим двоичное (и десятичное для контроля правильности ввода) значения
             cout << "Десятичное " << input_number_float << endl;
-            Bits(&input_number_float, sizeof(input_number_float));			
+            print_binary(&input_number_float, sizeof(input_number_float));			
             float_as_int.real = input_number_float;
             Invert(float_as_int.integer);
-            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
+            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'd':
             input_number_double = (double)convert_float(input_buffer, number_base);
             cout << "Десятичное " << input_number_double << endl;
-            Bits(&input_number_double, sizeof(input_number_double));
+            print_binary(&input_number_double, sizeof(input_number_double));
             double_as_long.real = input_number_double;
             Invert8(double_as_long.integer);
-            Bits(&double_as_long.integer, sizeof(double_as_long.integer));
+            print_binary(&double_as_long.integer, sizeof(double_as_long.integer));
             break;
         case 'i':
             input_number_int = (int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_int << endl;
-            Bits(&input_number_int, sizeof(input_number_int));
+            print_binary(&input_number_int, sizeof(input_number_int));
             float_as_int.real = input_number_int;
             Invert(float_as_int.integer);
-            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
+            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'l':
             input_number_long = (long int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_long << endl;
-            Bits(&input_number_long, sizeof(input_number_long));
+            print_binary(&input_number_long, sizeof(input_number_long));
             float_as_int.real = input_number_long;
             Invert(float_as_int.integer);
-            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
+            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'c':
             input_number_char = (char)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << (int)input_number_char << endl;
-            Bits(&input_number_char, sizeof(input_number_char));
+            print_binary(&input_number_char, sizeof(input_number_char));
             float_as_int.real = input_number_char;
             Invert(float_as_int.integer);
-            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
+            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 's':
             input_number_short = (short int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_short << endl;
-            Bits(&input_number_short, sizeof(input_number_short));
+            print_binary(&input_number_short, sizeof(input_number_short));
             float_as_int.real = input_number_short;
             Invert(float_as_int.integer);
-            Bits(&float_as_int.integer, sizeof(float_as_int.integer));
+            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         }
         pause;
@@ -359,23 +359,29 @@ long double convert_float (char * input_buffer, int number_base) {
 }
 
 //Функция вывода (побитно один байт)
-void Bits(char data) {
-    unsigned char mask = 0x80; //Начиная с такой маски
-    for (int k = 0; k < 8; k++) //ровно 8 раз (столько бит в байте)
-    {
-        cout << ((data & mask) ? "1" : "0");
-        mask >>= 1;
-        if (k == 3) cout << " "; //Пробел между тетрадами
+void print_binary (char data) {
+    unsigned char mask = 0x80; // Исходная маска
+
+    // Для всех 8 бит байта
+    for (int bit = 0; bit < 8; bit++) { 
+        cout << ((data & mask) ? "1" : "0"); // Выводим бит 
+        mask >>= 1;                          // Сдвигаем маску
         
+        if (bit == 3)
+            cout << " "; // Вставляем пробел между тетрадами
+
     }
-    cout << " "; //пробел между байтами
+    cout << " "; // Вставляем пробел между байтами
 }
 
 //Вывести побитно данные размером size байт
-void Bits(void * data, int size) {
-    char * Data = (char*)data;
-    for (int k = size - 1; k >= 0; k--)
-        Bits(Data[k]);
+void print_binary (void * data, int size) {
+    char* data_string = (char*)data; // Разбиваем число на байты
+
+    // Выводим число побайтово
+    for (int byte = size - 1; byte >= 0; byte--)
+        print_binary(data_string[byte]);
+
     cout << endl;
 }
 
@@ -433,7 +439,7 @@ void Invert(unsigned int arg) {
 
     // Выводим результат
     cout << "Результат: " << endl;
-    Bits(&arg, sizeof(arg));
+    print_binary(&arg, sizeof(arg));
 
 }
 
@@ -491,6 +497,6 @@ void Invert8(unsigned long long arg) {
 
     // Выводим результат
     cout << "Результат: " << endl;
-    Bits(&arg, sizeof(arg));
+    print_binary(&arg, sizeof(arg));
 
 }
