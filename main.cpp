@@ -13,7 +13,7 @@ void get_input_number (char* input_buffer, int number_base, bool flag_floating_p
 double power(long number, long degree);
 bool overflow_number_check (char* input_buffer, int number_base, char data_type);
 long long convert_integer (char * buffer, int base);
-long double ConvertFloat(char * buffer, int base);
+long double convert_float (char * buffer, int base);
 void Bits(char data);
 void Bits(void * data, int size);
 void Invert(unsigned int arg);
@@ -86,7 +86,7 @@ int main (void) {
         switch (data_type)
         {
         case 'f':
-            input_number_float = (float)ConvertFloat(input_buffer, number_base);			
+            input_number_float = (float)convert_float(input_buffer, number_base);			
             //Выводим двоичное (и десятичное для контроля правильности ввода) значения
             cout << "Десятичное " << input_number_float << endl;
             Bits(&input_number_float, sizeof(input_number_float));			
@@ -95,7 +95,7 @@ int main (void) {
             Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'd':
-            input_number_double = (double)ConvertFloat(input_buffer, number_base);
+            input_number_double = (double)convert_float(input_buffer, number_base);
             cout << "Десятичное " << input_number_double << endl;
             Bits(&input_number_double, sizeof(input_number_double));
             double_as_long.real = input_number_double;
@@ -280,7 +280,7 @@ double power (long number, long degree) {
 
 // Функция проверки значения на переполнение типа
 bool overflow_number_check (char* input_buffer, int number_base, char data_type) {
-    long double value = ConvertFloat(input_buffer, number_base); // Конвертируем строку в буфферную переменную большого размера
+    long double value = convert_float(input_buffer, number_base); // Конвертируем строку в буфферную переменную большого размера
     bool flag_overflow = false;
 
     if (value < 0) // Если значение отрицательное - принудительно сделаем его положительным
@@ -307,9 +307,9 @@ long long convert_integer (char * input_buffer, int number_base) {
 
     // Анализируем первый символ в строке
     switch (input_buffer[0]) {
-        case 0: return 0;          // Если первый символ 0 или строка пуста - значение будет 0
-        case '-' : flag_negative = true; char_counter++; break; // Если первый символ - минус - поднимаем флаг
-        case '+' : char_counter++; break;                       // Если первый символ - плюс - пропускаем символ
+        case 0: return 0;          // Если строка пуста - значение будет 0
+        case '-' : flag_negative = true; // Если первый символ - минус - поднимаем флаг
+        case '+' : char_counter++;       // Если первый символ - плюс - пропускаем символ
     }
 
     // Переводим число в десятичную систему счисления умножением, проходя строку посимвольно
@@ -322,33 +322,39 @@ long long convert_integer (char * input_buffer, int number_base) {
     return result;
 }
 
-//Функция преобразования числа с плавающей точкой
-//Самое точное машинное представление - long double
-long double ConvertFloat(char * buffer, int base) {
-    long double result = 0;
-    bool negative = false;
-    int k = 0;
-    long double m = 1.0; //На что умножать число
-    long double power = base;
-    long double multiplier = 1.0;
-    switch (buffer[0])
-    {
-    case 0: return 0;
-    case '-':negative = true;
-    case '+':k++;
-    };
-
-    for (; buffer[k] != 0; k++) //до конца строки
-    {
-        if (buffer[k] == '.') {
-            multiplier = 1.0 / base;//Встретилась точка
-            power = 1.0;
-            continue;
-        }
-        m *= multiplier;//Теперь множитель стал таким
-        result = power * result + m * get_char_number_base(buffer[k]);
+// Функция преобразования строки в число с плавающей точкой. Максимальный размер - от 96 до 128 бит.
+long double convert_float (char * input_buffer, int number_base) {
+    long double result = 0;     // Результат преобразования
+    bool flag_negative = false; // Флаг, показывающий, что число является отрицательным
+    int char_counter = 0;       // Счётчик символов
+    long double number_base_multiplier = 1.0; // Мультипликатор, основанный на основании системы счисления
+    long double conversion_multiplier = 1.0;  // Мультипликатор преобразания, основынный на основании системы счисления и разряде
+    long double number_power = number_base;   // Мультипликатор степени
+    
+    // Анализируем первый символ в строке
+    switch (input_buffer[0]) {
+        case 0: return 0;          // Если строка пуста - значение будет 0
+        case '-' : flag_negative = true; // Если первый символ - минус - поднимаем флаг
+        case '+' : char_counter++;       // Если первый символ - плюс - пропускаем символ
     }
-    if (negative) result = -result;
+
+    // Переводим число в десятичную систему счисления умножением, проходя строку посимвольно
+    for (; input_buffer[char_counter] != 0; char_counter++) {
+        
+        if (input_buffer[char_counter] == '.') {
+            number_base_multiplier = 1.0 / number_base; // Если мы перешли к дробной части - меняем её пультипликатор
+            number_power = 1.0; // Устанавливаем мультипликатор целой части в нейтральное относительно подсчёта значение
+            continue;           // Переходим к следующему символу
+        }
+        conversion_multiplier *= number_base_multiplier; // Обновляем мультиплиактор дробной части
+
+        // Высчитываем результат
+        result = number_power * result + conversion_multiplier * get_char_number_base(input_buffer[char_counter]);
+    }
+
+    if (flag_negative) // Если число отрицательное - делаем его отрицательным
+        result = -result;
+
     return result;
 }
 
