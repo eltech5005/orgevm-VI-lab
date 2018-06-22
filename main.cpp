@@ -204,7 +204,7 @@ void get_input_number (char* input_buffer, int number_base, bool flag_floating_p
 
         do {
             cout << "Введите число в системе счисления с основанием " << number_base << " и нажмите ENTER: ";
-            cin.getline(input_buffer, sizeof(input_buffer));
+            cin.getline(input_buffer, sizeof(input_buffer)+1);
             flag_number_acceptable = input_number_verify(input_buffer, number_base, flag_floating_point);
         
             if (!flag_number_acceptable)
