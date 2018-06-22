@@ -6,6 +6,7 @@ using namespace std;
 
 // Прототипы функций
 char get_data_type (char* input_buffer);
+int get_number_base (char* input_buffer);
 int Pos(char c);
 bool verify(char * s, int base, bool flag_floating_point);
 long long ConvertInt(char * buffer, int base);
@@ -65,13 +66,9 @@ int main (void) {
         // Определяем, выбрал ли пользователь тип данных с плавающей запятой
         flag_floating_point = (data_type == 'f' || data_type == 'd');
 
-        //Выясняем систему счисления
-        while (number_base<2 || number_base >= (26+10))
-        {
-            cout << "Выберите систему счисления 2-36: ";
-            cin.getline(input_buffer, sizeof(input_buffer));
-            number_base = atoi(input_buffer);
-        }
+        // Получаем основание системы счисления
+        number_base = get_number_base (input_buffer);
+        
         //Читаем строку
         do { //Настойчиво требуем ввода 
             cout << "Введите значение: ";
@@ -170,8 +167,7 @@ char get_data_type (char* input_buffer) {
         cout << "Доступные типы данных значения для выбора: char, short, int, long long, float, double." << endl
              << "Для выхода из программы введите quit." << endl
              << "Введите имя типа данных и нажмите ENTER: ";
-        cin.clear(); // Чистка буфера потока ввода
-        fflush(stdin);
+        cin.clear(); fflush(stdin);  // Чистка буфера потока ввода
         cin.getline(input_buffer, sizeof(input_buffer));
         data_type = input_buffer[0];
 
@@ -189,6 +185,22 @@ char get_data_type (char* input_buffer) {
     return data_type;
 }
 
+// Функция ввода основания системы счисления
+int get_number_base (char* input_buffer) {
+    int number_base = 0;
+
+    while (number_base < 2 || number_base >= (26+10)) {
+        cout << "Введите основние системы счисления от 2 до 36 и нажмите ENTER: ";
+        cin.clear(); fflush(stdin); // Чистка буфера потока ввода
+        cin.getline(input_buffer, sizeof(input_buffer));
+        number_base = atoi(input_buffer);
+
+        if (number_base < 2 || number_base >= (26+10))
+            cout << "Неверное основание системы счисления. Повторите ввод." << endl << endl;
+    }
+
+    return number_base;
+}
 
 int Pos(char c) {
     int result = 0;
