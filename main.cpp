@@ -7,8 +7,9 @@ using namespace std;
 // Прототипы функций
 char get_data_type (char* input_buffer);
 int get_number_base (char* input_buffer);
-int Pos(char c);
-bool verify(char * s, int base, bool flag_floating_point);
+int get_char_number_base (char);
+bool input_number_verify (char* input_buffer, int number_base, bool flag_floating_point);
+void get_input_number (char* input_buffer, int number_base, bool flag_floating_point);
 long long ConvertInt(char * buffer, int base);
 double power(long num, long deg);
 long double ConvertFloat(char * buffer, int base);
@@ -69,11 +70,8 @@ int main (void) {
         // Получаем основание системы счисления
         number_base = get_number_base (input_buffer);
         
-        //Читаем строку
-        do { //Настойчиво требуем ввода 
-            cout << "Введите значение: ";
-            cin.getline(input_buffer, sizeof(input_buffer));
-        } while (!verify(input_buffer, number_base, flag_floating_point)); //Пока не введет верное значение
+        // Получаем непосредственно значение
+        get_input_number (input_buffer, number_base, flag_floating_point);
 
         long double value = ConvertFloat(input_buffer, number_base);
         if (value < 0) value = -value;
@@ -202,30 +200,75 @@ int get_number_base (char* input_buffer) {
     return number_base;
 }
 
-int Pos(char c) {
-    int result = 0;
-    //Объявляем алфавит
-    char Alphabet[] = "0123456789ABCDEFGHIJKLMNPOPQRSTUVWXYZ";
-    for (; Alphabet[result] != 0 && Alphabet[result] != c; result++);
-    return result;
+// Функция ввода значения
+void get_input_number (char* input_buffer, int number_base, bool flag_floating_point) {
+        bool flag_number_acceptable = false;
+
+        do {
+            cout << "Введите число в системе счисления с основанием " << number_base << " и нажмите ENTER: ";
+            cin.getline(input_buffer, sizeof(input_buffer));
+            flag_number_acceptable = input_number_verify(input_buffer, number_base, flag_floating_point);
+        
+            if (!flag_number_acceptable)
+                cout << "Введённое значение некорректно. Повторите ввод." << endl << endl;
+        
+        } while (!flag_number_acceptable);
 }
 
-//Проверка на допустимость символов, заодно перевести на верхний регистр
-bool verify(char * s, int base, bool flag_floating_point) {
-    int points = 0; //Счетчик точек (отделяющих дробную часть)
-    for (int k = 0; s[k] != 0; k++)
-    {
-        char c = s[k];
-        if (k == 0 && (c == '-' || c == '+')) continue; //В начале может быть знак
-        if (c >= 'a' && c <= 'z') { c += 'A' - 'a'; s[k] = c; } //Верхний регистр
-        if (c == ',') { c = '.'; s[k] = c; }
-        if (c == '.') { points++;  continue; } 
-        if (Pos(c) < base) continue; //Проверка на законный символ
-        return false; //Если незаконный символ
+// Функция возвращает численное основание системы счисления для введённого символа
+int get_char_number_base (char buffer_char) {
+    char number_base_alphabet[] = "0123456789ABCDEFGHIJKLMNPOPQRSTUVWXYZ"; // Символы, допустимые в системах счисления с основаниями 2-36 включительно
+    int number_base = 0;  
+
+    // Высчитываем номер данного символа в алфавите систем счисления
+    for (; number_base_alphabet[number_base] != 0 && number_base_alphabet[number_base] != buffer_char; number_base++);
+
+    return number_base;
+}
+
+// Функция проверки введённого значения на допустимость символов для указанной системы счисления
+// Функция также переводит введённые буквы в верхний регистр
+bool input_number_verify (char* input_buffer, int number_base, bool flag_floating_point) {
+    int point_counter = 0; // Счетчик количества точек (отделяющих дробную часть)
+
+    // Оперируем строкой с введённым значением посимвольно
+    for (int char_counter = 0; input_buffer[char_counter] != 0; char_counter++) {
+        // Копируем текущий символ в буферную переменную на случай необходимости преобразования
+        char buffer_char = input_buffer[char_counter];
+
+        // Первый символ строки может быть знаком введённого числа
+        if (char_counter == 0 && (buffer_char == '-' || buffer_char == '+'))
+            continue;
+        // Если символ - буква в нижнем регистре - переводим её в верхний регистр
+        if (buffer_char >= 'a' && buffer_char <= 'z') {
+            buffer_char += 'A' - 'a';
+            input_buffer[char_counter] = buffer_char;
+        }
+        // Если символ - запятая - заменяем её на точку для корректности представления
+        if (buffer_char == ',') {
+            buffer_char = '.';
+            input_buffer[char_counter] = buffer_char;
+        }
+        // Если символ - точка - считаем её и переходим к следующему символу
+        if (buffer_char == '.') {
+            point_counter++;
+            continue;
+        }
+        // Если символ допустим для данной системы счисления - переходим к следующему символу
+        if (get_char_number_base(buffer_char) < number_base)
+            continue;
+
+        return false; // Во всех иных случаях символ недопустим
     }
-    if (points > 1) return false; //Если слишком много точек
-    if (points > 0 && !flag_floating_point) return false; //Если точка есть, но ее не должно быть
-    return true; //Все символы допустимые
+
+    // Если точек больше одной - введённое значение недопустимо
+    if (point_counter > 1)
+        return false;
+    // Если точка присутствует, но её не должно быть - введённое значение недопустимо
+    if (point_counter > 0 && !flag_floating_point)
+        return false;
+
+    return true; // В иных случаях значение проходит проверку корректности
 }
 
 //Функция преобразования целого числа
@@ -242,7 +285,7 @@ long long ConvertInt(char * buffer, int base) {
     };
 
     for (; buffer[k] != 0; k++) //Проходим до конца строки
-        result = result * base + Pos(buffer[k]);
+        result = result * base + get_char_number_base(buffer[k]);
     if (negative) result = -result; //Не зря же минус определяли
     return result;
 }
@@ -292,7 +335,7 @@ long double ConvertFloat(char * buffer, int base) {
             continue;
         }
         m *= multiplier;//Теперь множитель стал таким
-        result = power * result + m * Pos(buffer[k]);
+        result = power * result + m * get_char_number_base(buffer[k]);
     }
     if (negative) result = -result;
     return result;
