@@ -10,8 +10,9 @@ int get_number_base (char* input_buffer);
 int get_char_number_base (char);
 bool input_number_verify (char* input_buffer, int number_base, bool flag_floating_point);
 void get_input_number (char* input_buffer, int number_base, bool flag_floating_point);
-long long ConvertInt(char * buffer, int base);
 double power(long number, long degree);
+bool overflow_number_check (char* input_buffer, int number_base, char data_type);
+long long ConvertInt(char * buffer, int base);
 long double ConvertFloat(char * buffer, int base);
 void Bits(char data);
 void Bits(void * data, int size);
@@ -41,6 +42,7 @@ int main (void) {
     int input_number_int;        // Целое число - 4 байта
     long long input_number_long; // Целое число - 8 байт
     bool flag_floating_point; // Флаг, индицирующий, что число является числом с плавающей запятой
+    bool flag_overflow;       // Флаг, индицирующий, что введённое значение выходит за рамки допустимых значений
 
     // Используем механизм объединений для упрощения работы с числами с плавающей запятой
     // Объединение для представления float как unsigned int - 4 байта данных
@@ -73,23 +75,10 @@ int main (void) {
         // Получаем непосредственно значение
         get_input_number (input_buffer, number_base, flag_floating_point);
 
-        long double value = ConvertFloat(input_buffer, number_base);
-        if (value < 0) value = -value;
-        bool overflow = false;
-        //Проверка на переполнение
-        switch (data_type)
-        {
-        case 'f':overflow = value > FLT_MAX; break;
-        case 'd':overflow = value > DBL_MAX; break;
-        case 'l':overflow = value > INT64_MAX; break;
-        case 'i':overflow = value > INT32_MAX; break;
-        case 'c':overflow = value > 255; break;
-        case 's':overflow = value > INT16_MAX; break;
-        }
-        //Обработка переполнения
-        if (overflow)
-        {
-            cout << "Переполнение" << endl;
+        // Проверяем введённое значение на переполнение
+        flag_overflow = overflow_number_check (input_buffer, number_base, data_type);
+        if (flag_overflow) {
+            cout << "Ошибка: введённое число выходит за рамки допустимых значений для данного типа!" << endl << endl;
             continue;
         }
 
@@ -271,6 +260,45 @@ bool input_number_verify (char* input_buffer, int number_base, bool flag_floatin
     return true; // В иных случаях значение проходит проверку корректности
 }
 
+// Функция возведения целого числа в положительную или отрицательную степень
+double power (long number, long degree) {
+    double result = 1;
+
+    if (degree < 0) {
+        degree = -degree;
+        for (long i = 0; i < degree; i++)
+            result *= number;
+
+        return 1 / result;
+    } else {
+        for (long i = 0; i < degree; i++)
+            result *= number;
+
+        return result;
+    }
+}
+
+// Функия проверки значения на переполнение типа
+bool overflow_number_check (char* input_buffer, int number_base, char data_type) {
+    long double value = ConvertFloat(input_buffer, number_base); // Конвертируем строку в буфферную переменную большого размера
+    bool flag_overflow = false;
+
+    if (value < 0) // Если значение отрицательное - принудительно сделаем его положительным
+        value = -value;
+
+    // Проверка на попадание полученного значения в рамки допустимых для указанного типа данных
+    switch (data_type) {
+        case 'f': flag_overflow = value > FLT_MAX;   break;
+        case 'd': flag_overflow = value > DBL_MAX;   break;
+        case 'l': flag_overflow = value > INT64_MAX; break;
+        case 'i': flag_overflow = value > INT32_MAX; break;
+        case 'c': flag_overflow = value > 255;       break;
+        case 's': flag_overflow = value > INT16_MAX; break;
+    }
+    
+    return flag_overflow;
+}
+
 //Функция преобразования целого числа
 //Самое длинное машинное представление - 64 бита
 long long ConvertInt(char * buffer, int base) {
@@ -288,24 +316,6 @@ long long ConvertInt(char * buffer, int base) {
         result = result * base + get_char_number_base(buffer[k]);
     if (negative) result = -result; //Не зря же минус определяли
     return result;
-}
-
-// Функция возведения целого числа в положительную или отрицательную степень
-double power (long number, long degree) {
-    double result = 1;
-
-    if (degree < 0) {
-        degree = -degree;
-        for (long i = 0; i < degree; i++)
-            result *= number;
-
-        return 1 / result;
-    } else {
-        for (long i = 0; i < degree; i++)
-            result *= number;
-
-        return result;
-    }
 }
 
 //Функция преобразования числа с плавающей точкой
