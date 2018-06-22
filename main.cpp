@@ -12,7 +12,7 @@ bool input_number_verify (char* input_buffer, int number_base, bool flag_floatin
 void get_input_number (char* input_buffer, int number_base, bool flag_floating_point);
 double power(long number, long degree);
 bool overflow_number_check (char* input_buffer, int number_base, char data_type);
-long long ConvertInt(char * buffer, int base);
+long long convert_integer (char * buffer, int base);
 long double ConvertFloat(char * buffer, int base);
 void Bits(char data);
 void Bits(void * data, int size);
@@ -103,7 +103,7 @@ int main (void) {
             Bits(&double_as_long.integer, sizeof(double_as_long.integer));
             break;
         case 'i':
-            input_number_int = (int)ConvertInt(input_buffer, number_base);
+            input_number_int = (int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_int << endl;
             Bits(&input_number_int, sizeof(input_number_int));
             float_as_int.real = input_number_int;
@@ -111,7 +111,7 @@ int main (void) {
             Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'l':
-            input_number_long = (long int)ConvertInt(input_buffer, number_base);
+            input_number_long = (long int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_long << endl;
             Bits(&input_number_long, sizeof(input_number_long));
             float_as_int.real = input_number_long;
@@ -119,7 +119,7 @@ int main (void) {
             Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 'c':
-            input_number_char = (char)ConvertInt(input_buffer, number_base);
+            input_number_char = (char)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << (int)input_number_char << endl;
             Bits(&input_number_char, sizeof(input_number_char));
             float_as_int.real = input_number_char;
@@ -127,7 +127,7 @@ int main (void) {
             Bits(&float_as_int.integer, sizeof(float_as_int.integer));
             break;
         case 's':
-            input_number_short = (short int)ConvertInt(input_buffer, number_base);
+            input_number_short = (short int)convert_integer(input_buffer, number_base);
             cout << "Десятичное " << input_number_short << endl;
             Bits(&input_number_short, sizeof(input_number_short));
             float_as_int.real = input_number_short;
@@ -278,7 +278,7 @@ double power (long number, long degree) {
     }
 }
 
-// Функия проверки значения на переполнение типа
+// Функция проверки значения на переполнение типа
 bool overflow_number_check (char* input_buffer, int number_base, char data_type) {
     long double value = ConvertFloat(input_buffer, number_base); // Конвертируем строку в буфферную переменную большого размера
     bool flag_overflow = false;
@@ -299,22 +299,26 @@ bool overflow_number_check (char* input_buffer, int number_base, char data_type)
     return flag_overflow;
 }
 
-//Функция преобразования целого числа
-//Самое длинное машинное представление - 64 бита
-long long ConvertInt(char * buffer, int base) {
-    long long result = 0; //Результат
-    int k = 0; //Индекс в строке
-    bool negative = false; //Признак отрицательного числа
-    switch (buffer[0])
-    {
-    case 0: return 0; //В том случае если пустая строка - то и результат нулевой
-    case '-' : negative = true; //Случился первый символ минус	
-    case '+' : k++; //Или плюс
-    };
+// Функция преобразования строки в целое число. Максимальный размер - 64 бита.
+long long convert_integer (char * input_buffer, int number_base) {
+    long long result = 0;  // Результат преобразования
+    int char_counter = 0;  // Индекс символа в строке
+    bool flag_negative = false; // Флаг, показывающий, что число является отрицательным
 
-    for (; buffer[k] != 0; k++) //Проходим до конца строки
-        result = result * base + get_char_number_base(buffer[k]);
-    if (negative) result = -result; //Не зря же минус определяли
+    // Анализируем первый символ в строке
+    switch (input_buffer[0]) {
+        case 0: return 0;          // Если первый символ 0 или строка пуста - значение будет 0
+        case '-' : flag_negative = true; char_counter++; break; // Если первый символ - минус - поднимаем флаг
+        case '+' : char_counter++; break;                       // Если первый символ - плюс - пропускаем символ
+    }
+
+    // Переводим число в десятичную систему счисления умножением, проходя строку посимвольно
+    for (; input_buffer[char_counter] != 0; char_counter++)
+        result = result * number_base + get_char_number_base(input_buffer[char_counter]);
+
+    if (flag_negative) // Если число отрицательное - делаем его отрицательным
+        result = -result;
+
     return result;
 }
 
