@@ -1,3 +1,4 @@
+// Вариативный список заголовков для Windows и Linux
 #ifdef __linux__ 
     #include <stdlib.h>
     #include <iostream>
@@ -7,7 +8,6 @@
     #include <stdlib.h>
     #include <iostream>
 #else
-
 #endif
 
 using namespace std;
@@ -191,6 +191,65 @@ void Invert(unsigned int arg) {
 	Bits(&arg, sizeof(arg));
 
 }
+
+void Invert8(unsigned long long arg) {
+
+	int group_size; // Размер группы для замены
+	int first_bit;  // Старший бит первой группы
+	int second_bit; // Старший бит второй группы
+
+	unsigned long long mask_1 = 2; // Битовая маска 1 (00...10)
+	unsigned long long mask_2 = 0; // Битовая маска 2 (00...00)
+	unsigned long long mask_3 = 0xFFFFFFFFFFFFFFFFu; // Битовая маска (11...11) // u - указание того, что значение беззнаковое
+
+    // Вввод значений
+	cout << "Введите кол-во бит в группе:" << endl;
+	cin >> group_size;
+	group_size--; // Уменьшаем размер группы на 1, чтобы соответствовать нумерации бит с 0
+	cout << "Введите номер старшего бита в 1 группе:" << endl;
+	cin >> first_bit;
+	cout << "Введите номер старшего бита в 2 группе:" << endl;
+	cin >> second_bit;
+
+    // Если бит первой группы правее, чем второй - делаем swap для номеров этих битов, обеспечивая таким образом инвариантность алгоритма
+	if (first_bit < second_bit) {
+		int temp = first_bit;
+		first_bit = second_bit;
+		second_bit = temp;
+	}
+
+    // Получаем маску для секции размера группы +1, которую мы переставляем
+	mask_1 = mask_1 << group_size;
+	mask_1--;
+	mask_2 = mask_1; // Создаём копию этой маски
+
+	mask_1 = mask_1 << (first_bit - group_size);  // Покрываем первую группу маской
+	mask_2 = mask_2 << (second_bit - group_size); // Покрываем вторую группу маской
+
+	mask_1 = mask_1 & arg; // Вычленяем из данного числа секцию 1 при помощи битовой маски
+	mask_2 = mask_2 & arg; // Вычленяем из данного числа секцию 2 при помощи битовой маски
+
+    // Получаем маску с 0 на местах 1 в целевых группах исходного числа
+	mask_3 = mask_3 ^ mask_1;
+	mask_3 = mask_3 ^ mask_2;
+
+    // Обнуляем искомые группы в исходном числе
+	arg = arg & mask_3;
+
+    // При помощи сдвига меняем местами отображения искомых групп в масках
+	mask_1 = mask_1 >> first_bit - second_bit;
+	mask_2 = mask_2 << first_bit - second_bit;
+
+	// Вставляем исходные группы в данное число (уже перемещённые)
+	arg = arg | mask_1;
+	arg = arg | mask_2;
+
+	// Выводим результат
+	cout << "Результат: " << endl;
+	Bits(&arg, sizeof(arg));
+
+}
+
 int main()
 {
 	//Вместо иероглифов нормальный русский шрифт
@@ -215,6 +274,12 @@ int main()
 	}
 	uni2;
 	
+	union {
+		double num; //8 байт
+		unsigned long long byte8; //8 байт
+	}
+	uni3;
+
 	while (true)
 	{
 		//Выясняем формат данных
@@ -286,9 +351,9 @@ int main()
 			Double = (double)ConvertFloat(buffer, base);
 			cout << "Десятичное " << Double << endl;
 			Bits(&Double, sizeof(Double));
-			uni2.num = Double;
-			Invert(uni2.byte4);
-			Bits(&uni2.byte4, sizeof(uni2.byte4));
+			uni3.num = Double;
+			Invert8(uni3.byte8);
+			Bits(&uni3.byte8, sizeof(uni3.byte8));
 			break;
 		case 'i':
 			Int = (int)ConvertInt(buffer, base);
