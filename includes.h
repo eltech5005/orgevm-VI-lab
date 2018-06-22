@@ -1,3 +1,4 @@
+
 // Вариативный список заголовков для Windows и Linux
 #ifdef __linux__ 
     #include <stdlib.h>
