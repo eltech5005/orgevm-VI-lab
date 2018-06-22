@@ -11,7 +11,7 @@ int get_char_number_base (char);
 bool input_number_verify (char* input_buffer, int number_base, bool flag_floating_point);
 void get_input_number (char* input_buffer, int number_base, bool flag_floating_point);
 long long ConvertInt(char * buffer, int base);
-double power(long num, long deg);
+double power(long number, long degree);
 long double ConvertFloat(char * buffer, int base);
 void Bits(char data);
 void Bits(void * data, int size);
@@ -290,22 +290,19 @@ long long ConvertInt(char * buffer, int base) {
     return result;
 }
 
-//Функция озведения в степень(полож. и отриц.)
-double power(long num, long deg) {
+// Функция возведения целого числа в положительную или отрицательную степень
+double power (long number, long degree) {
     double result = 1;
 
-    if (deg < 0) {
-        deg = -deg;
-        for (long i = 0; i < deg; i++) {
-            result *= num;
-        }
+    if (degree < 0) {
+        degree = -degree;
+        for (long i = 0; i < degree; i++)
+            result *= number;
 
         return 1 / result;
-    }
-    else {
-        for (long i = 0; i < deg; i++) {
-            result *= num;
-        }
+    } else {
+        for (long i = 0; i < degree; i++)
+            result *= number;
 
         return result;
     }
