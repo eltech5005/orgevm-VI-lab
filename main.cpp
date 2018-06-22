@@ -233,7 +233,7 @@ double power(long num, long deg) {
 long double ConvertFloat(char * buffer, int base) {
     long double result = 0;
     bool negative = false;
-    int k = 0, s = 0, res = 1;
+    int k = 0;
     long double m = 1.0; //На что умножать число
     long double power = base;
     long double multiplier = 1.0;
@@ -324,8 +324,8 @@ void Invert(unsigned int arg) {
     arg = arg & mask_3;
 
     // При помощи сдвига меняем местами отображения искомых групп в масках
-    mask_1 = mask_1 >> first_bit - second_bit;
-    mask_2 = mask_2 << first_bit - second_bit;
+    mask_1 = mask_1 >> (first_bit - second_bit);
+    mask_2 = mask_2 << (first_bit - second_bit);
 
     // Вставляем исходные группы в данное число (уже перемещённые)
     arg = arg | mask_1;
@@ -382,8 +382,8 @@ void Invert8(unsigned long long arg) {
     arg = arg & mask_3;
 
     // При помощи сдвига меняем местами отображения искомых групп в масках
-    mask_1 = mask_1 >> first_bit - second_bit;
-    mask_2 = mask_2 << first_bit - second_bit;
+    mask_1 = mask_1 >> (first_bit - second_bit);
+    mask_2 = mask_2 << (first_bit - second_bit);
 
     // Вставляем исходные группы в данное число (уже перемещённые)
     arg = arg | mask_1;
