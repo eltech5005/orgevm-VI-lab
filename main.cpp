@@ -16,8 +16,10 @@ long long convert_integer (char * buffer, int base);
 long double convert_float (char * buffer, int base);
 void print_binary(char data);
 void print_binary(void * data, int size);
-void Invert(unsigned int arg);
-void Invert8(unsigned long long arg);
+void swap_bit_group_1byte  (char arg);
+void swap_bit_group_2bytes (unsigned short arg);
+void swap_bit_group_4bytes (unsigned int arg);
+void swap_bit_group_8bytes (unsigned long long arg);
 
 // Непосредственно программа
 int main (void) {
@@ -82,59 +84,66 @@ int main (void) {
             continue;
         }
 
-        //Преобразование из строки в нужный тип данных
-        switch (data_type)
-        {
-        case 'f':
-            input_number_float = (float)convert_float(input_buffer, number_base);			
-            //Выводим двоичное (и десятичное для контроля правильности ввода) значения
-            cout << "Десятичное " << input_number_float << endl;
-            print_binary(&input_number_float, sizeof(input_number_float));			
-            float_as_int.real = input_number_float;
-            Invert(float_as_int.integer);
-            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
-            break;
-        case 'd':
-            input_number_double = (double)convert_float(input_buffer, number_base);
-            cout << "Десятичное " << input_number_double << endl;
-            print_binary(&input_number_double, sizeof(input_number_double));
-            double_as_long.real = input_number_double;
-            Invert8(double_as_long.integer);
-            print_binary(&double_as_long.integer, sizeof(double_as_long.integer));
-            break;
-        case 'i':
-            input_number_int = (int)convert_integer(input_buffer, number_base);
-            cout << "Десятичное " << input_number_int << endl;
-            print_binary(&input_number_int, sizeof(input_number_int));
-            float_as_int.real = input_number_int;
-            Invert(float_as_int.integer);
-            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
-            break;
-        case 'l':
-            input_number_long = (long int)convert_integer(input_buffer, number_base);
-            cout << "Десятичное " << input_number_long << endl;
-            print_binary(&input_number_long, sizeof(input_number_long));
-            float_as_int.real = input_number_long;
-            Invert(float_as_int.integer);
-            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
-            break;
-        case 'c':
-            input_number_char = (char)convert_integer(input_buffer, number_base);
-            cout << "Десятичное " << (int)input_number_char << endl;
-            print_binary(&input_number_char, sizeof(input_number_char));
-            float_as_int.real = input_number_char;
-            Invert(float_as_int.integer);
-            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
-            break;
-        case 's':
-            input_number_short = (short int)convert_integer(input_buffer, number_base);
-            cout << "Десятичное " << input_number_short << endl;
-            print_binary(&input_number_short, sizeof(input_number_short));
-            float_as_int.real = input_number_short;
-            Invert(float_as_int.integer);
-            print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
-            break;
+        // Преобразование строки в указанный тип данных и вывод
+        switch (data_type) {
+            case 'c': // char
+                input_number_char = (char)convert_integer(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << (int)input_number_char << endl;
+                cout << "BIN: "; print_binary(&input_number_char, sizeof(input_number_char));
+
+                swap_bit_group_1byte(input_number_char); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&input_number_char, sizeof(input_number_char));
+                break;
+            case 's': // short
+                input_number_short = (short int)convert_integer(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << input_number_short << endl;
+                cout << "BIN: "; print_binary(&input_number_short, sizeof(input_number_short));
+
+                swap_bit_group_2bytes(input_number_short); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&input_number_short, sizeof(input_number_short));
+                break;
+            case 'i': // int
+                input_number_int = (int)convert_integer(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << input_number_int << endl;
+                cout << "BIN: "; print_binary(&input_number_int, sizeof(input_number_int));
+
+                swap_bit_group_4bytes(input_number_int); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&input_number_int, sizeof(input_number_int));
+                break;
+            case 'l': // long long
+                input_number_long = (long int)convert_integer(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << input_number_long << endl;
+                cout << "BIN: "; print_binary(&input_number_long, sizeof(input_number_long));
+
+                swap_bit_group_8bytes(input_number_long); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&input_number_long, sizeof(input_number_long));
+                break;
+            case 'f': // float
+                input_number_float = (float)convert_float(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << input_number_float << endl;
+                cout << "BIN: "; print_binary(&input_number_float, sizeof(input_number_float));
+
+                float_as_int.real = input_number_float;
+                swap_bit_group_4bytes(float_as_int.integer); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&float_as_int.integer, sizeof(float_as_int.integer));
+                break;
+            case 'd': // double
+                input_number_double = (double)convert_float(input_buffer, number_base); // Преобразуем строку в число
+                
+                cout << "Введённое значение (DEC): " << input_number_double << endl;
+                cout << "BIN: "; print_binary(&input_number_double, sizeof(input_number_double));
+
+                double_as_long.real = input_number_double;
+                swap_bit_group_8bytes(double_as_long.integer); // Произведём перестановку групп бит
+                cout << "Orig: "; print_binary(&double_as_long.integer, sizeof(double_as_long.integer));
+                break;
         }
+        cout << endl << "Для продолжения нажмите ENTER ... ";
         pause;
     }
 }
@@ -385,7 +394,127 @@ void print_binary (void * data, int size) {
     cout << endl;
 }
 
-void Invert(unsigned int arg) {
+void swap_bit_group_1byte (char arg) {
+
+    int group_size; // Размер группы для замены
+    int first_bit;  // Старший бит первой группы
+    int second_bit; // Старший бит второй группы
+
+    char mask_1 = 2; // Битовая маска 1 (00...10)
+    char mask_2 = 0; // Битовая маска 2 (00...00)
+    char mask_3 = 0xFF; // Битовая маска (11...11) // u - указание того, что значение беззнаковое
+
+    // Вввод значений
+    cout << endl
+         << "Перестановка групп бит в двоичном представлении." << endl << "Внимание: нумерация бит начинается с 0 и идёт справа налево." << endl;
+    cout << "Введите количество бит в группе для перестановки: ";
+    cin >> group_size;
+    group_size--; // Уменьшаем размер группы на 1, чтобы соответствовать нумерации бит с 0
+    cout << "Введите номер старшего бита в 1 группе: ";
+    cin >> first_bit;
+    cout << "Введите номер старшего бита в 2 группе: ";
+    cin >> second_bit;
+
+    // Если бит первой группы правее, чем второй - делаем swap для номеров этих битов, обеспечивая таким образом инвариантность алгоритма
+    if (first_bit < second_bit) {
+        int temp = first_bit;
+        first_bit = second_bit;
+        second_bit = temp;
+    }
+
+    // Получаем маску для секции размера группы +1, которую мы переставляем
+    mask_1 = mask_1 << group_size;
+    mask_1--;
+    mask_2 = mask_1; // Создаём копию этой маски
+
+    mask_1 = mask_1 << (first_bit - group_size);  // Покрываем первую группу маской
+    mask_2 = mask_2 << (second_bit - group_size); // Покрываем вторую группу маской
+
+    mask_1 = mask_1 & arg; // Вычленяем из данного числа секцию 1 при помощи битовой маски
+    mask_2 = mask_2 & arg; // Вычленяем из данного числа секцию 2 при помощи битовой маски
+
+    // Получаем маску с 0 на местах 1 в целевых группах исходного числа
+    mask_3 = mask_3 ^ mask_1;
+    mask_3 = mask_3 ^ mask_2;
+
+    // Обнуляем искомые группы в исходном числе
+    arg = arg & mask_3;
+
+    // При помощи сдвига меняем местами отображения искомых групп в масках
+    mask_1 = mask_1 >> (first_bit - second_bit);
+    mask_2 = mask_2 << (first_bit - second_bit);
+
+    // Вставляем исходные группы в данное число (уже перемещённые)
+    arg = arg | mask_1;
+    arg = arg | mask_2;
+
+    // Выводим результат
+    cout << endl << "Результат перестановки:" << endl << "Swap: ";
+    print_binary(&arg, sizeof(arg));
+
+}
+
+void swap_bit_group_2bytes (unsigned short arg) {
+
+    int group_size; // Размер группы для замены
+    int first_bit;  // Старший бит первой группы
+    int second_bit; // Старший бит второй группы
+
+    unsigned short mask_1 = 2; // Битовая маска 1 (00...10)
+    unsigned short mask_2 = 0; // Битовая маска 2 (00...00)
+    unsigned short mask_3 = 0xFFFFu; // Битовая маска (11...11) // u - указание того, что значение беззнаковое
+
+    // Вввод значений
+    cout << endl
+         << "Перестановка групп бит в двоичном представлении." << endl << "Внимание: нумерация бит начинается с 0 и идёт справа налево." << endl;
+    cout << "Введите количество бит в группе для перестановки: ";
+    cin >> group_size;
+    group_size--; // Уменьшаем размер группы на 1, чтобы соответствовать нумерации бит с 0
+    cout << "Введите номер старшего бита в 1 группе: ";
+    cin >> first_bit;
+    cout << "Введите номер старшего бита в 2 группе: ";
+    cin >> second_bit;
+
+    // Если бит первой группы правее, чем второй - делаем swap для номеров этих битов, обеспечивая таким образом инвариантность алгоритма
+    if (first_bit < second_bit) {
+        int temp = first_bit;
+        first_bit = second_bit;
+        second_bit = temp;
+    }
+
+    // Получаем маску для секции размера группы +1, которую мы переставляем
+    mask_1 = mask_1 << group_size;
+    mask_1--;
+    mask_2 = mask_1; // Создаём копию этой маски
+
+    mask_1 = mask_1 << (first_bit - group_size);  // Покрываем первую группу маской
+    mask_2 = mask_2 << (second_bit - group_size); // Покрываем вторую группу маской
+
+    mask_1 = mask_1 & arg; // Вычленяем из данного числа секцию 1 при помощи битовой маски
+    mask_2 = mask_2 & arg; // Вычленяем из данного числа секцию 2 при помощи битовой маски
+
+    // Получаем маску с 0 на местах 1 в целевых группах исходного числа
+    mask_3 = mask_3 ^ mask_1;
+    mask_3 = mask_3 ^ mask_2;
+
+    // Обнуляем искомые группы в исходном числе
+    arg = arg & mask_3;
+
+    // При помощи сдвига меняем местами отображения искомых групп в масках
+    mask_1 = mask_1 >> (first_bit - second_bit);
+    mask_2 = mask_2 << (first_bit - second_bit);
+
+    // Вставляем исходные группы в данное число (уже перемещённые)
+    arg = arg | mask_1;
+    arg = arg | mask_2;
+
+    // Выводим результат
+    cout << endl << "Результат перестановки:" << endl << "Swap: ";
+    print_binary(&arg, sizeof(arg));
+
+}
+
+void swap_bit_group_4bytes (unsigned int arg) {
 
     int group_size; // Размер группы для замены
     int first_bit;  // Старший бит первой группы
@@ -396,12 +525,14 @@ void Invert(unsigned int arg) {
     unsigned int mask_3 = 0xFFFFFFFFu; // Битовая маска (11...11) // u - указание того, что значение беззнаковое
 
     // Вввод значений
-    cout << "Введите кол-во бит в группе:" << endl;
+    cout << endl
+         << "Перестановка групп бит в двоичном представлении." << endl << "Внимание: нумерация бит начинается с 0 и идёт справа налево." << endl;
+    cout << "Введите количество бит в группе для перестановки: ";
     cin >> group_size;
     group_size--; // Уменьшаем размер группы на 1, чтобы соответствовать нумерации бит с 0
-    cout << "Введите номер старшего бита в 1 группе:" << endl;
+    cout << "Введите номер старшего бита в 1 группе: ";
     cin >> first_bit;
-    cout << "Введите номер старшего бита в 2 группе:" << endl;
+    cout << "Введите номер старшего бита в 2 группе: ";
     cin >> second_bit;
 
     // Если бит первой группы правее, чем второй - делаем swap для номеров этих битов, обеспечивая таким образом инвариантность алгоритма
@@ -438,12 +569,12 @@ void Invert(unsigned int arg) {
     arg = arg | mask_2;
 
     // Выводим результат
-    cout << "Результат: " << endl;
+    cout << endl << "Результат перестановки:" << endl << "Swap: ";
     print_binary(&arg, sizeof(arg));
 
 }
 
-void Invert8(unsigned long long arg) {
+void swap_bit_group_8bytes (unsigned long long arg) {
 
     int group_size; // Размер группы для замены
     int first_bit;  // Старший бит первой группы
@@ -454,12 +585,14 @@ void Invert8(unsigned long long arg) {
     unsigned long long mask_3 = 0xFFFFFFFFFFFFFFFFu; // Битовая маска (11...11) // u - указание того, что значение беззнаковое
 
     // Вввод значений
-    cout << "Введите кол-во бит в группе:" << endl;
+    cout << endl
+         << "Перестановка групп бит в двоичном представлении." << endl << "Внимание: нумерация бит начинается с 0 и идёт справа налево." << endl;
+    cout << "Введите количество бит в группе для перестановки: ";
     cin >> group_size;
     group_size--; // Уменьшаем размер группы на 1, чтобы соответствовать нумерации бит с 0
-    cout << "Введите номер старшего бита в 1 группе:" << endl;
+    cout << "Введите номер старшего бита в 1 группе: ";
     cin >> first_bit;
-    cout << "Введите номер старшего бита в 2 группе:" << endl;
+    cout << "Введите номер старшего бита в 2 группе: ";
     cin >> second_bit;
 
     // Если бит первой группы правее, чем второй - делаем swap для номеров этих битов, обеспечивая таким образом инвариантность алгоритма
@@ -496,7 +629,7 @@ void Invert8(unsigned long long arg) {
     arg = arg | mask_2;
 
     // Выводим результат
-    cout << "Результат: " << endl;
+    cout << endl << "Результат перестановки:" << endl << "Swap: ";
     print_binary(&arg, sizeof(arg));
 
 }
