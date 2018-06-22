@@ -5,6 +5,7 @@
 using namespace std;
 
 // Прототипы функций
+char get_data_type (char* input_buffer);
 int Pos(char c);
 bool verify(char * s, int base, bool flag_floating_point);
 long long ConvertInt(char * buffer, int base);
@@ -27,9 +28,9 @@ int main (void) {
     clrscr;
 
     // Объявление переменных
-    char data_type;        // Тип данных вводимого значени
-    int number_base;       // Основание системы счисления вводимого значения
-    char input_buffer[80]; // Строковый буфер для ввода значения
+    char data_type = '.';  // Тип данных вводимого значени
+    int number_base = 0;   // Основание системы счисления вводимого значения
+    char* input_buffer = new char[80]; // Строковый буфер для ввода значения
     // Переменные различного типа для ввода значения 
     float input_number_float;    // Число с плавающей запятой - 4 байта
     double input_number_double;  // Число с плавающей запятой - 8 байт
@@ -52,29 +53,19 @@ int main (void) {
         unsigned long long integer;
     } double_as_long;
 
-
+    // Повторяем алгоритм пока пользователь не пожелает выйти
     while (true) {
-        //Выясняем формат данных
-        data_type = '?';
-        while (
-            data_type != 'f' &&
-            data_type != 'd' &&
-            data_type != 's' &&
-            data_type != 'i' &&
-            data_type != 'l' &&
-            data_type != 'c'
-            )
-        {
-            cout << "Формат данных: float, double, short, int, long long, char или quit" << endl;
-            cin.getline(input_buffer, sizeof(input_buffer));
-            data_type = input_buffer[0];
-            if (data_type == 'q') return 0; //Завершаем работу программы если quit
-            if (data_type == 0) return 0; //или просто enter
-        }
-        //Если float или double, значит подразумевается запятая
-        flag_floating_point = data_type == 'f' || data_type == 'd';
+        // Получаем тип данных
+        data_type = get_data_type (input_buffer);
+
+        // Завершаем работу программы если пользователь ввёл quit
+        if (data_type == 'q')
+            return 0; 
+
+        // Определяем, выбрал ли пользователь тип данных с плавающей запятой
+        flag_floating_point = (data_type == 'f' || data_type == 'd');
+
         //Выясняем систему счисления
-        number_base = 0;
         while (number_base<2 || number_base >= (26+10))
         {
             cout << "Выберите систему счисления 2-36: ";
@@ -163,6 +154,41 @@ int main (void) {
         pause;
     }
 }
+
+// Функция чтения с клавиатуры типа вводимого значения
+char get_data_type (char* input_buffer) {
+    char data_type = '?';
+    
+    while ( data_type != 'c' &&
+            data_type != 's' &&
+            data_type != 'i' &&
+            data_type != 'l' &&
+            data_type != 'f' &&
+            data_type != 'd' &&
+            data_type != 'q') {
+
+        cout << "Доступные типы данных значения для выбора: char, short, int, long long, float, double." << endl
+             << "Для выхода из программы введите quit." << endl
+             << "Введите имя типа данных и нажмите ENTER: ";
+        cin.clear(); // Чистка буфера потока ввода
+        fflush(stdin);
+        cin.getline(input_buffer, sizeof(input_buffer));
+        data_type = input_buffer[0];
+
+       if ( data_type != 'c' &&
+            data_type != 's' &&
+            data_type != 'i' &&
+            data_type != 'l' &&
+            data_type != 'f' &&
+            data_type != 'd' &&
+            data_type != 'q') {
+            cout << "Неверный тип данных. Повторите ввод." << endl << endl;
+        }
+    }
+
+    return data_type;
+}
+
 
 int Pos(char c) {
     int result = 0;
